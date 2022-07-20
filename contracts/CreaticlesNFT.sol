@@ -101,9 +101,13 @@ contract CreaticlesNFT is
     }
 
     /*
-    @dev mints a list of NFTs
-    @param to => the address that should receive the NFTs
-    @param 
+     * @dev mints a list of NFTs
+     * @param to => the address that should receive the NFTs
+     * @param proposalId => the list of proposalId
+     * @param detailsHashes => the list of keccak256 hash of the metadata of the request
+     * @param tokenURLs => the list of tokenURLs
+     * @param winners => list of the addresses of the chosen winners
+     * @param numPerToken => number of NFTs per winner . You can choose to mint fewer NFTs when your contest is over but you cannot mint more.
      */
     function mintBundle(
         address to,
