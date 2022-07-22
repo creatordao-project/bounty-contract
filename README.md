@@ -1,5 +1,13 @@
 # Request-contract
 
+## Rinkeby
+
+CreaticlesDapp
+| Contract       | Address                                    |
+| :------------- | :----------------------------------------- |
+| CreaticlesDapp | 0x71740079116A113E94A67331B9f68e3189747a9a |
+| CreaticlesNFT  | 0x9c34d828944376cbd21A11d83a8A22f0F06Aee8f |
+
 ## Functions
 
 ### createRequest
@@ -28,33 +36,33 @@ Parameters:
 | _paymentERC20Address | address | ERC20Address of payment.                                                                                              |
 | _paymentValue        | uint256 | Value of payment                                                                                                      |
 
-### acceptProposals
+### mintBundle
 
-can only be called by the CreaticlesNFT contract. Used to pay winners after the CreaticlesNFT contract mints the winning NFTs
+requester mints a list of NFTs
 
 ```
-  function acceptProposals(
-        address _to,
-        uint256 _requestId,
-        uint256[] memory _proposalId,
-        uint256[] memory _tokenIds,
-        string[] memory _tokenURLs,
-        address[] memory _winners,
-        uint256 _tokenSupplies
-    ) public
+    function mintBundle(
+        address to,
+        uint256 requestId,
+        uint256[] memory proposalId,
+        bytes32[] memory detailsHashes,
+        string[] memory tokenURLs,
+        address[] memory winners,
+        uint256 numPerToken
+    ) public virtual isRequester(requestId)
 ```
 
 Parameters:
 
-| Name           | Type      | Description                                 |
-| :------------- | :-------- | :------------------------------------------ |
-| _to            | address   | the address that should receive the NFTs    |
-| _requestId     | uint256   | the requestId of the respective request     |
-| _proposalId    | uint256[] | the list of proposalId                      |
-| _tokenIds      | uint256[] | the list of tokenIds                        |
-| _tokenURLs     | string[]  | the list of tokenURLs                       |
-| _winners       | string[]  | list of the addresses of the chosen winners |
-| _tokenSupplies | uint256   | supply of the NFTs                          |
+| Name          | Type      | Description                                                                                                       |
+| :------------ | :-------- | :---------------------------------------------------------------------------------------------------------------- |
+| to            | address   | the address that should receive the NFTs                                                                          |
+| requestId     | uint256   | the requestId of the respective request                                                                           |
+| proposalId    | uint256[] | the list of proposalId                                                                                            |
+| detailsHashes | bytes32[] | the list of keccak256 hash of the metadata of the request                                                         |
+| tokenURLs     | string[]  | the list of tokenURLs                                                                                             |
+| winners       | string[]  | list of the addresses of the chosen winners                                                                       |
+| numPerToken   | uint256   | number of NFTs per winner . You can choose to mint fewer NFTs when your contest is over but you cannot mint more. |
 
 
 ### reclaimFunds
@@ -67,9 +75,9 @@ function reclaimFunds(uint256 _requestId) public
 
 Parameters:
 
-| Name           | Type      | Description                                 |
-| :------------- | :-------- | :------------------------------------------ |
-| _requestId            | uint256   | the requestId of the respective request   |
+| Name       | Type    | Description                             |
+| :--------- | :------ | :-------------------------------------- |
+| _requestId | uint256 | the requestId of the respective request |
 
 ### isRequester
 
@@ -84,10 +92,10 @@ function isRequester(address _addr, uint256 _requestId)
 
 Parameters:
 
-| Name           | Type      | Description                                 |
-| :------------- | :-------- | :------------------------------------------ |
-| _addr            | address   | the target address   |
-| _requestId            | uint256   | the requestId of the respective request   |
+| Name       | Type    | Description                             |
+| :--------- | :------ | :-------------------------------------- |
+| _addr      | address | the target address                      |
+| _requestId | uint256 | the requestId of the respective request |
 
 ### isOpenForChoosing
 
@@ -99,6 +107,6 @@ used by CreaticlesNFT contract to determine if the specified request is not clos
 
 Parameters:
 
-| Name           | Type      | Description                                 |
-| :------------- | :-------- | :------------------------------------------ |
-| _requestId            | uint256   | the requestId of the respective request   |
+| Name       | Type    | Description                             |
+| :--------- | :------ | :-------------------------------------- |
+| _requestId | uint256 | the requestId of the respective request |
