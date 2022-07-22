@@ -10,7 +10,7 @@ CreaticlesDapp
 
 ## Functions
 
-### createRequest
+### createRequest (CreaticlesDapp)
 
 creates a request
 
@@ -36,7 +36,7 @@ Parameters:
 | _paymentERC20Address | address | ERC20Address of payment.                                                                                              |
 | _paymentValue        | uint256 | Value of payment                                                                                                      |
 
-### mintBundle
+### mintBundle (CreaticlesNFT)
 
 requester mints a list of NFTs
 
@@ -65,7 +65,7 @@ Parameters:
 | numPerToken   | uint256   | number of NFTs per winner . You can choose to mint fewer NFTs when your contest is over but you cannot mint more. |
 
 
-### reclaimFunds
+### reclaimFunds (CreaticlesDapp)
 
 allows requester to reclaim their funds if they still have funds and the choosing period is over
 
@@ -79,7 +79,7 @@ Parameters:
 | :--------- | :------ | :-------------------------------------- |
 | _requestId | uint256 | the requestId of the respective request |
 
-### isRequester
+### isRequester (CreaticlesDapp)
 
 used by CreaticlesNFT contract to determine if the minter is the owner of the specified request
 
@@ -97,7 +97,7 @@ Parameters:
 | _addr      | address | the target address                      |
 | _requestId | uint256 | the requestId of the respective request |
 
-### isOpenForChoosing
+### isOpenForChoosing (CreaticlesDapp)
 
 used by CreaticlesNFT contract to determine if the specified request is not closed
 
