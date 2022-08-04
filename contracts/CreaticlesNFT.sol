@@ -66,17 +66,16 @@ contract CreaticlesNFT is
         string memory symbol,
         string memory baseTokenURI
     ) public {
-        __CreaticlesNFT_init(name, symbol, baseTokenURI);
+        __CreaticlesNFT_init(name, symbol);
         admin = _msgSender();
 
         _baseTokenURI = baseTokenURI;
     }
 
-    function __CreaticlesNFT_init(
-        string memory name,
-        string memory symbol,
-        string memory baseTokenURI
-    ) internal initializer {
+    function __CreaticlesNFT_init(string memory name, string memory symbol)
+        internal
+        initializer
+    {
         __Context_init_unchained();
         __ERC165_init_unchained();
         __ERC721_init_unchained(name, symbol);

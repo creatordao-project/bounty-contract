@@ -5,7 +5,7 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     console.log(deployer.address);
     const Nft = await ethers.getContractFactory("CreaticlesNFT");
-    const proxy = await upgrades.deployProxy(Nft, ["Creaticles NFT","CNFT","https://server-prod.creaticles.com/files/"]);
+    const proxy = await upgrades.deployProxy(Nft, ["CreatorDAO NFT","CNFT","https://server-prod.creaticles.com/files/"]);
     await proxy.deployed();
     console.log("Nft deployed to:", proxy.address);
 }
