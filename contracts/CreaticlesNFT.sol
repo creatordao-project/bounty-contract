@@ -121,12 +121,10 @@ contract CreaticlesNFT is
         // require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
         require(_dapp.isOpenForChoosing(requestId));
         require(tokenURLs.length > 0, "No tokenURLs detected");
-        require(tokenURLs.length <= 10, "Max winners exceeded");
         require(
             detailsHashes.length == tokenURLs.length,
             "TokenURLs length does not equal that of detailHashes"
         );
-        require(numPerToken <= 10, "Max supply per token exceeded");
 
         uint256[] memory tokenIds = new uint256[](winners.length * numPerToken);
         // We cannot just use balanceOf to create the new tokenId because tokens

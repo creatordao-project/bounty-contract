@@ -20,7 +20,8 @@ contract CreaticlesDapp is ContextUpgradeable {
         uint256 numMintPerToken;
     }
 
-    uint256 public cval; 
+    uint256 COMMISSION = 25;
+    uint256 public cval;
     uint256 public numberOfRequests;
     mapping(uint256 => Request) public requests;
     address public adm;
@@ -53,12 +54,16 @@ contract CreaticlesDapp is ContextUpgradeable {
     );
     event FundsReclaimed(uint256 requestId, address requester, uint256 amount);
     event ChoosingPeriodChanged(uint256 period);
+    event CommissionChanged(uint256 commission);
 
     mapping(uint256 => address) public request_erc20_addresses;
 
     //MODIFIERS
     modifier onlyRequester(uint256 _requestId) {
-        require(requests[_requestId].requester == msg.sender);
+        require(
+            requests[_requestId].requester == msg.sender,
+            "Sender is not Requester"
+        );
         _;
     }
     modifier isCreaticlesNFTContract() {
@@ -80,17 +85,24 @@ contract CreaticlesDapp is ContextUpgradeable {
     /**
      *
      * @param _choosingPeriod: units DAYS => used to set allowable time period for requester to choose winners
+     * @param  _commission =>  (parts per thousand)
      * @param _creaticles: Creaticles's ERC20Token address
      */
-    function initialize(uint256 _choosingPeriod, address _creaticles) public {
+    function initialize(
+        uint256 _choosingPeriod,
+        uint256 _commission,
+        address _creaticles
+    ) public {
         require(!initialized, "Contract instance has already been initialized");
         initialized = true;
         adm = msg.sender;
         CHOOSING_PERIOD = _choosingPeriod * 1 days;
+        COMMISSION = _commission;
         creaticles = _creaticles;
     }
+
     /**
-     * @param nftAddress: 
+     * @param nftAddress:
      */
     function setNFTContractAddress(address nftAddress) public isAdmin {
         nftContractAddress = nftAddress;
@@ -115,17 +127,15 @@ contract CreaticlesDapp is ContextUpgradeable {
         uint256 _paymentValue
     ) public payable returns (uint256) {
         require(_numberOfWinners > 0);
-        require(_numberOfWinners <= 100);
         require(_paymentValue > 0);
 
-        uint256 commission = 25; // parts per thousand
         uint256 _cval;
         uint256 _value;
         {
             if (_paymentERC20Address == address(0)) {
                 // zero address corresponds to ethereum payment, the default
                 require(msg.value == _paymentValue);
-                _cval = (msg.value * commission) / 1000; // 2.5% commision
+                _cval = (msg.value * COMMISSION) / 1000; // 2.5% commision
                 _value = msg.value - _cval;
                 cval += _cval;
             } else if (_paymentERC20Address == creaticles) {
@@ -142,7 +152,7 @@ contract CreaticlesDapp is ContextUpgradeable {
                     address(this),
                     _paymentValue
                 );
-                _cval = (_paymentValue * commission) / 1000; // 2.5% commision
+                _cval = (_paymentValue * COMMISSION) / 1000; // 2.5% commision
                 _value = _paymentValue - _cval;
             }
             request_erc20_addresses[numberOfRequests] = _paymentERC20Address;
@@ -176,7 +186,7 @@ contract CreaticlesDapp is ContextUpgradeable {
 
     /**
      * @dev update creaticles's ERC20Token address
-     * @param _token => Creaticles's ERC20Token address    
+     * @param _token => Creaticles's ERC20Token address
      */
     function updateCreaticles(address _token) external isAdmin {
         creaticles = _token;
@@ -191,7 +201,7 @@ contract CreaticlesDapp is ContextUpgradeable {
      * @param _tokenURLs => the list of tokenURLs
      * @param _winners => list of the addresses of the chosen winners
      * @param _tokenSupplies => supply of the NFTs
-    */
+     */
     function acceptProposals(
         address _to,
         uint256 _requestId,
@@ -228,7 +238,7 @@ contract CreaticlesDapp is ContextUpgradeable {
             }
         }
 
-        _request.active = false;
+        // _request.active = false;
         emit ProposalAccepted(
             _to,
             _requestId,
@@ -244,10 +254,13 @@ contract CreaticlesDapp is ContextUpgradeable {
     /**
      * @dev allows requester to reclaim their funds if they still have funds and the choosing period is over
      * @param _requestId => the requestId of the respective request
-    */
-    function reclaimFunds(uint256 _requestId) public {
+     */
+    function reclaimFunds(uint256 _requestId)
+        external
+        onlyRequester(_requestId)
+    {
         Request storage _request = requests[_requestId];
-        require(_msgSender() == _request.requester, "Sender is not Requester");
+        // require(_msgSender() == _request.requester, "Sender is not Requester");
         require(
             block.timestamp >= _request.expiresAt + CHOOSING_PERIOD ||
                 !_request.active,
@@ -268,20 +281,29 @@ contract CreaticlesDapp is ContextUpgradeable {
     }
 
     /**
-    * @dev set CHOOSING_PERIOD
-    * @param _duration => (units of days)
-    */
+     * @dev set CHOOSING_PERIOD
+     * @param _duration => (units of days)
+     */
     function setChoosingPeriod(uint256 _duration) public isAdmin {
         CHOOSING_PERIOD = _duration * 1 days;
         emit ChoosingPeriodChanged(CHOOSING_PERIOD);
     }
 
+    /**
+     * @dev set COMMISSION
+     * @param _commission =>  (parts per thousand)
+     */
+    function setCommission(uint256 _commission) public isAdmin {
+        COMMISSION = _commission;
+        emit CommissionChanged(COMMISSION);
+    }
+
     //VIEW FUNCTIONS
     /**
-    * @dev used by CreaticlesNFT contract to determine if the minter is the owner of the specified request
-    * @param _addr => the target address
-    * @param _requestId => the requestId of the respective request
-    */
+     * @dev used by CreaticlesNFT contract to determine if the minter is the owner of the specified request
+     * @param _addr => the target address
+     * @param _requestId => the requestId of the respective request
+     */
     function isRequester(address _addr, uint256 _requestId)
         public
         view
@@ -293,9 +315,9 @@ contract CreaticlesDapp is ContextUpgradeable {
     }
 
     /**
-    * @dev used by CreaticlesNFT contract to determine if the specified request is not closed
-    * @param _requestId => the requestId of the respective request
-    */
+     * @dev used by CreaticlesNFT contract to determine if the specified request is not closed
+     * @param _requestId => the requestId of the respective request
+     */
     function isOpenForChoosing(uint256 _requestId) public view returns (bool) {
         Request memory _request = requests[_requestId];
         require(
@@ -312,10 +334,10 @@ contract CreaticlesDapp is ContextUpgradeable {
     }
 
     /**
-    * @dev used to set new admin
-    * @param _newAdmin => 
-    * 
-    */
+     * @dev used to set new admin
+     * @param _newAdmin =>
+     *
+     */
     function setAdmin(address _newAdmin) external isCreaticlesNFTContract {
         adm = _newAdmin;
     }
@@ -323,7 +345,7 @@ contract CreaticlesDapp is ContextUpgradeable {
     /**
      * @dev send ETH to dest
      * @param _amount => amount of send
-     * @param _dest => dest of send   
+     * @param _dest => dest of send
      */
     function sendValue(uint256 _amount, address payable _dest) public isAdmin {
         require(_amount <= cval);
