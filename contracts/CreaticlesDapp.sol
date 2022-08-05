@@ -21,7 +21,8 @@ contract CreaticlesDapp is ContextUpgradeable {
     }
 
     uint256 COMMISSION = 25;
-    uint256 public cval;
+
+    address payable public recipientDao;
     uint256 public numberOfRequests;
     mapping(uint256 => Request) public requests;
     address public adm;
@@ -87,11 +88,13 @@ contract CreaticlesDapp is ContextUpgradeable {
      * @param _choosingPeriod: units DAYS => used to set allowable time period for requester to choose winners
      * @param  _commission =>  (parts per thousand)
      * @param _creaticles: Creaticles's ERC20Token address
+     * @param _recipientDao: DAO's address
      */
     function initialize(
         uint256 _choosingPeriod,
         uint256 _commission,
-        address _creaticles
+        address _creaticles,
+        address payable _recipientDao
     ) public {
         require(!initialized, "Contract instance has already been initialized");
         initialized = true;
@@ -99,6 +102,7 @@ contract CreaticlesDapp is ContextUpgradeable {
         CHOOSING_PERIOD = _choosingPeriod * 1 days;
         COMMISSION = _commission;
         creaticles = _creaticles;
+        recipientDao = _recipientDao;
     }
 
     /**
@@ -137,7 +141,7 @@ contract CreaticlesDapp is ContextUpgradeable {
                 require(msg.value == _paymentValue);
                 _cval = (msg.value * COMMISSION) / 1000; // 2.5% commision
                 _value = msg.value - _cval;
-                cval += _cval;
+                recipientDao.transfer(_cval);
             } else if (_paymentERC20Address == creaticles) {
                 IERC20(_paymentERC20Address).transferFrom(
                     msg.sender,
@@ -154,6 +158,7 @@ contract CreaticlesDapp is ContextUpgradeable {
                 );
                 _cval = (_paymentValue * COMMISSION) / 1000; // 2.5% commision
                 _value = _paymentValue - _cval;
+                IERC20(_paymentERC20Address).transfer(recipientDao, _cval);
             }
             request_erc20_addresses[numberOfRequests] = _paymentERC20Address;
 
@@ -343,13 +348,14 @@ contract CreaticlesDapp is ContextUpgradeable {
     }
 
     /**
-     * @dev send ETH to dest
-     * @param _amount => amount of send
-     * @param _dest => dest of send
+     * @dev update TaxRecipient
+     * @param _newRecipientDao => new DAO's address
+     *
      */
-    function sendValue(uint256 _amount, address payable _dest) public isAdmin {
-        require(_amount <= cval);
-        cval -= _amount;
-        _dest.transfer(_amount);
+    function updateTaxRecipient(address payable _newRecipientDao)
+        public
+        isAdmin
+    {
+        recipientDao = _newRecipientDao;
     }
 }
