@@ -8,6 +8,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract CreaticlesDapp is ContextUpgradeable {
     uint256 public CHOOSING_PERIOD;
+    uint256 COMMISSION;
+
 
     struct Request {
         address requester;
@@ -20,7 +22,6 @@ contract CreaticlesDapp is ContextUpgradeable {
         uint256 numMintPerToken;
     }
 
-    uint256 COMMISSION = 25;
     uint256 public cval;
     uint256 public numberOfRequests;
     mapping(uint256 => Request) public requests;
