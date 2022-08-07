@@ -8,10 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract CreaticlesDapp is ContextUpgradeable {
     uint256 public CHOOSING_PERIOD;
-    uint256 COMMISSION;
-
-        uint256 COMMISSION;
-
+    uint256 TAX;
 
     struct Request {
         address requester;
@@ -24,7 +21,7 @@ contract CreaticlesDapp is ContextUpgradeable {
         uint256 numMintPerToken;
     }
 
-    address payable public recipientDao;
+    address payable public treasury;
     uint256 public numberOfRequests;
     mapping(uint256 => Request) public requests;
     address public adm;
@@ -57,7 +54,7 @@ contract CreaticlesDapp is ContextUpgradeable {
     );
     event FundsReclaimed(uint256 requestId, address requester, uint256 amount);
     event ChoosingPeriodChanged(uint256 period);
-    event CommissionChanged(uint256 commission);
+    event TaxChanged(uint256 tax);
 
     mapping(uint256 => address) public request_erc20_addresses;
 
@@ -88,23 +85,23 @@ contract CreaticlesDapp is ContextUpgradeable {
     /**
      *
      * @param _choosingPeriod: units DAYS => used to set allowable time period for requester to choose winners
-     * @param  _commission =>  (parts per thousand)
+     * @param  _tax =>  (parts per thousand)
      * @param _creaticles: Creaticles's ERC20Token address
-     * @param _recipientDao: DAO's address
+     * @param _treasury: DAO's address
      */
     function initialize(
         uint256 _choosingPeriod,
-        uint256 _commission,
+        uint256 _tax,
         address _creaticles,
-        address payable _recipientDao
+        address payable _treasury
     ) public {
         require(!initialized, "Contract instance has already been initialized");
         initialized = true;
         adm = msg.sender;
         CHOOSING_PERIOD = _choosingPeriod * 1 days;
-        COMMISSION = _commission;
+        TAX = _tax;
         creaticles = _creaticles;
-        recipientDao = _recipientDao;
+        treasury = _treasury;
     }
 
     /**
@@ -141,9 +138,9 @@ contract CreaticlesDapp is ContextUpgradeable {
             if (_paymentERC20Address == address(0)) {
                 // zero address corresponds to ethereum payment, the default
                 require(msg.value == _paymentValue);
-                _cval = (msg.value * COMMISSION) / 1000; // 2.5% commision
+                _cval = (msg.value * TAX) / 1000; // 2.5% commision
                 _value = msg.value - _cval;
-                recipientDao.transfer(_cval);
+                treasury.transfer(_cval);
             } else if (_paymentERC20Address == creaticles) {
                 IERC20(_paymentERC20Address).transferFrom(
                     msg.sender,
@@ -158,9 +155,9 @@ contract CreaticlesDapp is ContextUpgradeable {
                     address(this),
                     _paymentValue
                 );
-                _cval = (_paymentValue * COMMISSION) / 1000; // 2.5% commision
+                _cval = (_paymentValue * TAX) / 1000; // 2.5% commision
                 _value = _paymentValue - _cval;
-                IERC20(_paymentERC20Address).transfer(recipientDao, _cval);
+                IERC20(_paymentERC20Address).transfer(treasury, _cval);
             }
             request_erc20_addresses[numberOfRequests] = _paymentERC20Address;
 
@@ -297,12 +294,12 @@ contract CreaticlesDapp is ContextUpgradeable {
     }
 
     /**
-     * @dev set COMMISSION
-     * @param _commission =>  (parts per thousand)
+     * @dev set TAX
+     * @param _tax =>  (parts per thousand)
      */
-    function setCommission(uint256 _commission) public isAdmin {
-        COMMISSION = _commission;
-        emit CommissionChanged(COMMISSION);
+    function setTax(uint256 _tax) public isAdmin {
+        TAX = _tax;
+        emit TaxChanged(TAX);
     }
 
     //VIEW FUNCTIONS
@@ -351,13 +348,10 @@ contract CreaticlesDapp is ContextUpgradeable {
 
     /**
      * @dev update TaxRecipient
-     * @param _newRecipientDao => new DAO's address
+     * @param _newTtreasury => new DAO's address
      *
      */
-    function updateTaxRecipient(address payable _newRecipientDao)
-        public
-        isAdmin
-    {
-        recipientDao = _newRecipientDao;
+    function updateTreasury(address payable _newTtreasury) public isAdmin {
+        treasury = _newTtreasury;
     }
 }
