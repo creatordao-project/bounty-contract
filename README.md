@@ -5,8 +5,8 @@
 CreaticlesDapp
 | Contract       | Address                                    |
 | :------------- | :----------------------------------------- |
-| CreaticlesDapp | 0x71740079116A113E94A67331B9f68e3189747a9a |
-| CreaticlesNFT  | 0x1E3cb094F0a6A278E8dEF59fe7A2f271C23a6Fac |
+| CreaticlesDapp | 0xFA354de76C5c1d8Ea19ceD99829C38460B55313E |
+| CreaticlesNFT  | 0x7D7440dfC4803bC0E0a1daee502Ee7b07139708b |
 
 ## Functions
 

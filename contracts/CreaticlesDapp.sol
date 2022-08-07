@@ -8,7 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract CreaticlesDapp is ContextUpgradeable {
     uint256 public CHOOSING_PERIOD;
-    uint256 TAX;
+    uint256 public TAX;
 
     struct Request {
         address requester;
