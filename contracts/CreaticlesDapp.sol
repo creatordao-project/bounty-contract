@@ -28,8 +28,6 @@ contract CreaticlesDapp is ContextUpgradeable {
     address public nftContractAddress;
     bool private initialized;
 
-    address creaticles;
-
     //EVENTS
     event RequestCreated(
         uint256 requestId,
@@ -86,13 +84,11 @@ contract CreaticlesDapp is ContextUpgradeable {
      *
      * @param _choosingPeriod: units DAYS => used to set allowable time period for requester to choose winners
      * @param  _tax =>  (parts per thousand)
-     * @param _creaticles: Creaticles's ERC20Token address
      * @param _treasury: DAO's address
      */
     function initialize(
         uint256 _choosingPeriod,
         uint256 _tax,
-        address _creaticles,
         address payable _treasury
     ) public {
         require(!initialized, "Contract instance has already been initialized");
@@ -100,7 +96,6 @@ contract CreaticlesDapp is ContextUpgradeable {
         adm = msg.sender;
         CHOOSING_PERIOD = _choosingPeriod * 1 days;
         TAX = _tax;
-        creaticles = _creaticles;
         treasury = _treasury;
     }
 
@@ -141,14 +136,7 @@ contract CreaticlesDapp is ContextUpgradeable {
                 _cval = (msg.value * TAX) / 1000; // 2.5% commision
                 _value = msg.value - _cval;
                 treasury.transfer(_cval);
-            } else if (_paymentERC20Address == creaticles) {
-                IERC20(_paymentERC20Address).transferFrom(
-                    msg.sender,
-                    address(this),
-                    _paymentValue
-                );
-                _value = _paymentValue;
-            } else {
+            } else  {
                 // Here we explore additional ERC20 payment options
                 IERC20(_paymentERC20Address).transferFrom(
                     msg.sender,
@@ -186,14 +174,6 @@ contract CreaticlesDapp is ContextUpgradeable {
         );
 
         return numberOfRequests - 1;
-    }
-
-    /**
-     * @dev update creaticles's ERC20Token address
-     * @param _token => Creaticles's ERC20Token address
-     */
-    function updateCreaticles(address _token) external isAdmin {
-        creaticles = _token;
     }
 
     /**
