@@ -135,7 +135,8 @@ contract CreaticlesDapp is ContextUpgradeable {
                 require(msg.value == _paymentValue);
                 _cval = (msg.value * TAX) / 1000; // 2.5% commision
                 _value = msg.value - _cval;
-                treasury.transfer(_cval);
+                (bool sent, bytes memory data) = treasury.call{value: _cval}("");
+                require(sent, "Failed to send Ether");
             } else  {
                 // Here we explore additional ERC20 payment options
                 IERC20(_paymentERC20Address).transferFrom(
