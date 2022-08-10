@@ -5,7 +5,7 @@
 CreaticlesDapp
 | Contract       | Address                                    |
 | :------------- | :----------------------------------------- |
-| CreaticlesDapp | 0xFA354de76C5c1d8Ea19ceD99829C38460B55313E |
+| CreaticlesDapp | 0xc01d7d899bF700dEDeE3A1CBf13E883DbbC7f8c7 |
 | CreaticlesNFT  | 0x7D7440dfC4803bC0E0a1daee502Ee7b07139708b |
 
 ## Mainnet
