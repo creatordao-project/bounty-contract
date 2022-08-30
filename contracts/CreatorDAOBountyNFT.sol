@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.9;
 
-import "./CreaticlesDapp.sol";
+import "./CreatorDAOBountyDapp.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
@@ -13,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // import "hardhat/console.sol";
 
-contract CreaticlesNFT is
+contract CreatorDAOBountyNFT is
     Initializable,
     ContextUpgradeable,
     ERC721EnumerableUpgradeable,
@@ -56,7 +55,7 @@ contract CreaticlesNFT is
     }
 
     modifier isRequester(uint256 requestId) {
-        CreaticlesDapp _dapp = CreaticlesDapp(dappContractAddress);
+        CreatorDAOBountyDapp _dapp = CreatorDAOBountyDapp(dappContractAddress);
         require(_dapp.isRequester(_msgSender(), requestId));
         _;
     }
@@ -117,7 +116,7 @@ contract CreaticlesNFT is
         address[] memory winners,
         uint256 numPerToken
     ) public virtual isRequester(requestId) {
-        CreaticlesDapp _dapp = CreaticlesDapp(dappContractAddress);
+        CreatorDAOBountyDapp _dapp = CreatorDAOBountyDapp(dappContractAddress);
         // require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
         require(_dapp.isOpenForChoosing(requestId));
         require(tokenURLs.length > 0, "No tokenURLs detected");
@@ -233,7 +232,7 @@ contract CreaticlesNFT is
     @dev used to set new admin
     */
     function setAdmin(address newAdmin) external isAdmin {
-        CreaticlesDapp _dapp = CreaticlesDapp(dappContractAddress);
+        CreatorDAOBountyDapp _dapp = CreatorDAOBountyDapp(dappContractAddress);
         admin = newAdmin;
         _dapp.setAdmin(newAdmin);
     }

@@ -30,7 +30,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     mainnet: {
       url: process.env.MAINNET_API_URL,
       accounts: [`0x${process.env.PRIVATE_KEY}`],
-      gasPrice: 9000000000, // 10 gwei
+      gasPrice: 2000000000, // 2 gwei
     },
     mumbai: {
       url: process.env.MUMBAI_API_URL,
