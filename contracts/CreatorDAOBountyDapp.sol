@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-// import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-// import "hardhat/console.sol";
 
 contract CreatorDAOBountyDapp is ContextUpgradeable {
     uint256 public CHOOSING_PERIOD;
@@ -25,7 +22,8 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
     address payable public treasury;
     uint256 public numberOfRequests;
     mapping(uint256 => Request) public requests;
-    address public adm;
+    mapping(uint256 => address) public request_erc20_addresses;
+    address public admin;
     address public nftContractAddress;
     bool private initialized;
 
@@ -55,8 +53,6 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
     event ChoosingPeriodChanged(uint256 period);
     event TaxChanged(uint256 tax);
 
-    mapping(uint256 => address) public request_erc20_addresses;
-
     //MODIFIERS
     modifier onlyRequester(uint256 _requestId) {
         require(
@@ -65,16 +61,16 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
         );
         _;
     }
-    modifier isCreaticlesNFTContract() {
+    modifier isNFTContract() {
         require(
             _msgSender() == nftContractAddress,
-            "Only Creaticles NFT Contract has permission to call this function"
+            "Only CreatorDAOBounty NFT Contract has permission to call this function"
         );
         _;
     }
     modifier isAdmin() {
         require(
-            _msgSender() == adm,
+            _msgSender() == admin,
             "This function can only be called by an admin"
         );
         _;
@@ -94,7 +90,7 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
     ) public {
         require(!initialized, "Contract instance has already been initialized");
         initialized = true;
-        adm = msg.sender;
+        admin = msg.sender;
         CHOOSING_PERIOD = _choosingPeriod * 1 days;
         TAX = _tax;
         treasury = _treasury;
@@ -136,9 +132,11 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
                 require(msg.value == _paymentValue);
                 _cval = (msg.value * TAX) / 1000; // 2.5% commision
                 _value = msg.value - _cval;
-                (bool sent, bytes memory data) = treasury.call{value: _cval}("");
+                (bool sent, bytes memory data) = treasury.call{value: _cval}(
+                    ""
+                );
                 require(sent, "Failed to send Ether");
-            } else  {
+            } else {
                 // Here we explore additional ERC20 payment options
                 IERC20(_paymentERC20Address).transferFrom(
                     msg.sender,
@@ -179,7 +177,7 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
     }
 
     /**
-     * @dev can only be called by the CreaticlesNFT contract. Used to pay winners after the CreaticlesNFT contract mints the winning NFTs
+     * @dev can only be called by the CreatorDAOBountyNFT contract. Used to pay winners after the CreatorDAOBountyNFT contract mints the winning NFTs
      * @param _to => the address that should receive the NFTs
      * @param _requestId => the requestId of the respective request
      * @param _proposalId => the list of proposalId
@@ -196,7 +194,7 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
         string[] memory _tokenURLs,
         address[] memory _winners,
         uint256 _tokenSupplies
-    ) public isCreaticlesNFTContract {
+    ) public isNFTContract {
         Request storage _request = requests[_requestId];
         require(
             _winners.length <= _request.numberOfWinners,
@@ -211,10 +209,10 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
         //loop through winners and send their ETH
         for (uint256 i = 0; i < _winners.length; i++) {
             if (request_erc20_address == address(0)) {
-                require(
-                    payable(_winners[i]).send(_winnerValue),
-                    "Failed to send Ether"
-                );
+                (bool sent, bytes memory data) = _winners[i].call{
+                    value: _winnerValue
+                }("");
+                require(sent, "Failed to send Ether");
             } else {
                 // if we are not sending ether, we send ERC20 token
                 IERC20(request_erc20_address).transfer(
@@ -246,7 +244,6 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
         onlyRequester(_requestId)
     {
         Request storage _request = requests[_requestId];
-        // require(_msgSender() == _request.requester, "Sender is not Requester");
         require(
             block.timestamp >= _request.expiresAt + CHOOSING_PERIOD ||
                 !_request.active,
@@ -286,7 +283,7 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
 
     //VIEW FUNCTIONS
     /**
-     * @dev used by CreaticlesNFT contract to determine if the minter is the owner of the specified request
+     * @dev used by NFT contract to determine if the minter is the owner of the specified request
      * @param _addr => the target address
      * @param _requestId => the requestId of the respective request
      */
@@ -301,7 +298,7 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
     }
 
     /**
-     * @dev used by CreaticlesNFT contract to determine if the specified request is not closed
+     * @dev used by NFT contract to determine if the specified request is not closed
      * @param _requestId => the requestId of the respective request
      */
     function isOpenForChoosing(uint256 _requestId) public view returns (bool) {
@@ -321,11 +318,11 @@ contract CreatorDAOBountyDapp is ContextUpgradeable {
 
     /**
      * @dev used to set new admin
-     * @param _newAdmin =>
+     * @param _newAdmin => new admin's address
      *
      */
-    function setAdmin(address _newAdmin) external isCreaticlesNFTContract {
-        adm = _newAdmin;
+    function setAdmin(address _newAdmin) external isNFTContract {
+        admin = _newAdmin;
     }
 
     /**

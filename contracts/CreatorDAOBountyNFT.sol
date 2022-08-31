@@ -10,8 +10,6 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-// import "hardhat/console.sol";
-
 contract CreatorDAOBountyNFT is
     Initializable,
     ContextUpgradeable,
@@ -30,8 +28,6 @@ contract CreatorDAOBountyNFT is
     // mapping tokenId to the creator of the data
     mapping(uint256 => address) public _proposer;
 
-    // Mapping tokenId to
-
     string public _baseTokenURI;
 
     address private admin;
@@ -41,7 +37,7 @@ contract CreatorDAOBountyNFT is
     modifier isDappContract() {
         require(
             _msgSender() == dappContractAddress,
-            "Only Creaticles Dapp Contract has permission to call this function"
+            "Only CreatorDAOBounty Dapp Contract has permission to call this function"
         );
         _;
     }
@@ -65,16 +61,16 @@ contract CreatorDAOBountyNFT is
         string memory symbol,
         string memory baseTokenURI
     ) public {
-        __CreaticlesNFT_init(name, symbol);
+        __CreatorDAOBountyNFT_init(name, symbol);
         admin = _msgSender();
 
         _baseTokenURI = baseTokenURI;
     }
 
-    function __CreaticlesNFT_init(string memory name, string memory symbol)
-        internal
-        initializer
-    {
+    function __CreatorDAOBountyNFT_init(
+        string memory name,
+        string memory symbol
+    ) internal initializer {
         __Context_init_unchained();
         __ERC165_init_unchained();
         __ERC721_init_unchained(name, symbol);
@@ -84,15 +80,11 @@ contract CreatorDAOBountyNFT is
         __ERC721Pausable_init_unchained();
     }
 
-    function __CreaticlesNFT_init_unchained(
+    function __CreatorDAOBountyNFT_init_unchained(
         string memory name,
         string memory symbol,
         string memory baseTokenURI
-    ) internal initializer {
-        //     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        //     _setupRole(MINTER_ROLE, _msgSender());
-        //     _setupRole(PAUSER_ROLE, _msgSender());
-    }
+    ) internal initializer {}
 
     function setDappContractAddress(address nftAddress) public isAdmin {
         dappContractAddress = nftAddress;
@@ -117,7 +109,6 @@ contract CreatorDAOBountyNFT is
         uint256 numPerToken
     ) public virtual isRequester(requestId) {
         CreatorDAOBountyDapp _dapp = CreatorDAOBountyDapp(dappContractAddress);
-        // require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
         require(_dapp.isOpenForChoosing(requestId));
         require(tokenURLs.length > 0, "No tokenURLs detected");
         require(
@@ -128,16 +119,16 @@ contract CreatorDAOBountyNFT is
         uint256[] memory tokenIds = new uint256[](winners.length * numPerToken);
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
-        uint8 idx = 0;
+        uint8 id = 0;
         for (uint8 i = 0; i < winners.length; i++) {
             for (uint8 j = 0; j < numPerToken; j++) {
                 _mint(to, _tokenIdTracker.current());
                 _tokenURIs[_tokenIdTracker._value] = tokenURLs[i];
                 _detailsHash[_tokenIdTracker._value] = detailsHashes[i];
                 _proposer[_tokenIdTracker._value] = winners[i];
-                tokenIds[idx] = _tokenIdTracker._value;
+                tokenIds[id] = _tokenIdTracker._value;
                 _tokenIdTracker.increment();
-                idx++;
+                id++;
             }
         }
         _dapp.acceptProposals(
@@ -225,8 +216,6 @@ contract CreatorDAOBountyNFT is
     {
         return super.supportsInterface(interfaceId);
     }
-
-    uint256[48] private __gap;
 
     /**
     @dev used to set new admin

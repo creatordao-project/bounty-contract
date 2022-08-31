@@ -1,8 +1,7 @@
-# Request-contract
+# Bounty-contract
 
 ## Rinkeby
 
-CreaticlesDapp
 | Contract       | Address                                    |
 | :------------- | :----------------------------------------- |
 | CreatorDAOBountyDapp | 0xc01d7d899bF700dEDeE3A1CBf13E883DbbC7f8c7 |
@@ -10,7 +9,6 @@ CreaticlesDapp
 
 ## Mainnet
 
-CreaticlesDapp
  Contract       | Address                                    |
 | :------------- | :----------------------------------------- |
 | CreatorDAOBountyDapp | 0x39535E7A28b5827292E6d3B984BF6FcF9934300C |
@@ -18,7 +16,7 @@ CreaticlesDapp
 
 ## Functions
 
-### createRequest (CreaticlesDapp)
+### createRequest (Dapp)
 
 creates a request
 
@@ -44,7 +42,7 @@ Parameters:
 | _paymentERC20Address | address | ERC20Address of payment.                                                                                              |
 | _paymentValue        | uint256 | Value of payment                                                                                                      |
 
-### mintBundle (CreaticlesNFT)
+### mintBundle (NFT)
 
 requester mints a list of NFTs
 
@@ -73,7 +71,7 @@ Parameters:
 | numPerToken   | uint256   | number of NFTs per winner . You can choose to mint fewer NFTs when your contest is over but you cannot mint more. |
 
 
-### reclaimFunds (CreaticlesDapp)
+### reclaimFunds (Dapp)
 
 allows requester to reclaim their funds if they still have funds and the choosing period is over
 
@@ -87,9 +85,9 @@ Parameters:
 | :--------- | :------ | :-------------------------------------- |
 | _requestId | uint256 | the requestId of the respective request |
 
-### isRequester (CreaticlesDapp)
+### isRequester (Dapp)
 
-used by CreaticlesNFT contract to determine if the minter is the owner of the specified request
+used by NFT contract to determine if the minter is the owner of the specified request
 
 ```
 function isRequester(address _addr, uint256 _requestId)
@@ -105,9 +103,9 @@ Parameters:
 | _addr      | address | the target address                      |
 | _requestId | uint256 | the requestId of the respective request |
 
-### isOpenForChoosing (CreaticlesDapp)
+### isOpenForChoosing (Dapp)
 
-used by CreaticlesNFT contract to determine if the specified request is not closed
+used by NFT contract to determine if the specified request is not closed
 
 ```
  function isOpenForChoosing(uint256 _requestId) public view returns (bool)
